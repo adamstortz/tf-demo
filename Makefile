@@ -44,14 +44,14 @@ apply: ## Apply resource changes
 .PHONY: deploy
 deploy: ## Deploy base infrastructure, build and push docker image, deploy workload infrastructure
 	@(cd infastructure/base; make deploy)
+	$(GET_ACCOUNT_NUMBER)
+	$(GET_ECR_URL)
+	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(ACCOUNT_NUMBER).dkr.ecr.$(AWS_REGION).amazonaws.com
+	docker build -t "$(ECR_URL):latest" -t "$(ECR_URL):${image_version}" -f service/src/Dockerfile service/src/
+	docker push "$(ECR_URL):latest"
+	docker push "$(ECR_URL):${image_version}"
 	@(cd infastructure/workload; make deploy)
 
-# $(GET_ACCOUNT_NUMBER)
-# $(GET_ECR_URL)
-# aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(ACCOUNT_NUMBER).dkr.ecr.$(AWS_REGION).amazonaws.com
-# docker build -t "$(ECR_URL):latest" -t "$(ECR_URL):${image_version}" -f service/src/Dockerfile service/src/
-# docker push "$(ECR_URL):latest"
-# docker push "$(ECR_URL):${image_version}"
 
 .PHONY: destroy
 destroy: ## Destroy resources
