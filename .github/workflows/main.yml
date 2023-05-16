@@ -1,0 +1,38 @@
+name: pull_request
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: "Terraform Apply"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/oidc_github_terraform
+          aws-region: us-east-2
+      - name: Terraform Init
+        id: init
+        run: |
+          terraform -chdir=infastructure/base init
+          terraform -chdir=infastructure/workload init
+      
+      - name: Terraform Apply
+        id: apply
+        run: |
+          terraform -chdir=infastructure/base apply -no-color -auto-approve
+          ECR_URL=$(terraform -chdir=infastructure/base output -raw ecr_url)
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $(ACCOUNT_NUMBER).dkr.ecr.us-east-2.amazonaws.com
+          docker build -t "${ECR_URL}:latest" -t "${ECR_URL}:${image_version}" -f service/src/Dockerfile service/src/
+          docker push "${ECR_URL}:latest"
+          docker push "${ECR_URL}:${image_version}"
+          terraform -chdir=infastructure/workload apply -no-color -var="image_version=${{ github.event.number }}" -auto-approve
