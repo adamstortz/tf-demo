@@ -19,16 +19,6 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/oidc_github_terraform
           aws-region: us-east-2
-
-      
-      - name: Terraform Init
-        uses: hashicorp/terraform-github-actions/init@v0.4.0
-        env:
-          TF_ACTION_WORKING_DIR: 'infrastructure/base'
-      - name: Terraform Init
-        uses: hashicorp/terraform-github-actions/init@v0.4.0
-        env:
-          TF_ACTION_WORKING_DIR: 'infrastructure/base'
       - name: Terraform Init
         id: init
         run: |
