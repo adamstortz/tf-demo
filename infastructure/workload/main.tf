@@ -10,6 +10,7 @@ locals {
   workload_name = "tf-demo"
   service_name  = "${local.workload_name}-service"
   cluster_name  = "${local.workload_name}-eks-${random_string.suffix.result}"
+  github_role   = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/oidc_github_terraform"
 }
 
 module "vpc" {
@@ -49,7 +50,7 @@ module "eks" {
   subnet_ids                     = module.vpc.private_subnets
   cluster_endpoint_public_access = true
   kms_key_administrators = [
-    "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/oidc_github_terraform",
+    local.github_role,
     "arn:aws:sts::${data.aws_caller_identity.current.account_id}:assumed-role/AWSReservedSSO_AdministratorAccess_21201f2554c485ff/astortz"
   ]
   eks_managed_node_group_defaults = {
@@ -68,6 +69,15 @@ module "eks" {
     }
 
   }
+    manage_aws_auth_configmap = true
+
+  aws_auth_roles = [
+    {
+      rolearn  = local.github_role
+      username = "github"
+      groups   = ["system:masters"]
+    },
+  ]
 }
 
 data "aws_eks_cluster" "cluster" {
