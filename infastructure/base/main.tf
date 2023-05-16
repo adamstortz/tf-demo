@@ -1,8 +1,6 @@
-data "aws_availability_zones" "available" {}
-
 locals {
   workload_name = "tf-demo"
-  service_name = "${local.workload_name}-service"
+  service_name  = "${local.workload_name}-service"
 }
 
 resource "random_string" "suffix" {

@@ -3,9 +3,3 @@ variable "image_version" {
   type        = string
   default     = "local"
 }
-
-variable "region" {
-  description = "The AWS Region to deploy into"
-  type        = string
-  default     = "us-east-2"
-}

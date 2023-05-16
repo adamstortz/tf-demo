@@ -1,3 +1,6 @@
+provider "aws" {
+}
+
 terraform {
 
   required_providers {
@@ -19,8 +22,4 @@ terraform {
   }
 
   required_version = "~> 1.4"
-}
-
-provider "aws" {
-  region = var.region
 }

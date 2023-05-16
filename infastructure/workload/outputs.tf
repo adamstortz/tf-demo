@@ -1,4 +1,3 @@
-
 # output "cluster_endpoint" {
 #   description = "Kubernetes Cluster Endpoint"
 #   value       = module.eks.cluster_endpoint

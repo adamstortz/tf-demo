@@ -38,6 +38,10 @@ plan: ## Plan resource changes
 apply: ## Apply resource changes
 	@terraform apply
 
+.PHONY: deploy
+apply: ## Apply resource changes
+	@terraform apply -auto-approve
+
 .PHONY: destroy
 destroy: ## Destroy resources
 	@terraform destroy

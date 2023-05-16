@@ -34,12 +34,15 @@ workspace: ## Workspace infra resources
 
 .PHONY: plan
 plan: ## Plan resource changes
-	echo $(AWS_ACCESS_KEY_ID)
-	terraform plan -var-file=$(environment).tfvars
+	@terraform plan
 
 .PHONY: apply
 apply: ## Apply resource changes
 	@terraform apply
+
+.PHONY: deploy
+apply: ## Apply resource changes
+	@terraform apply -auto-approve
 
 .PHONY: destroy
 destroy: ## Destroy resources

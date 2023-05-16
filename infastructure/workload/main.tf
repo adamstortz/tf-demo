@@ -7,8 +7,8 @@ resource "random_string" "suffix" {
 
 locals {
   workload_name = "tf-demo"
-  service_name = "${local.workload_name}-service"
-  cluster_name = "${local.workload_name}-eks-${random_string.suffix.result}"
+  service_name  = "${local.workload_name}-service"
+  cluster_name  = "${local.workload_name}-eks-${random_string.suffix.result}"
 }
 
 module "vpc" {
