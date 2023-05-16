@@ -41,7 +41,7 @@ apply: ## Apply resource changes
 	@terraform apply
 
 .PHONY: deploy
-apply: ## Apply resource changes
+deploy: ## Apply resource changes
 	@terraform apply -auto-approve
 
 .PHONY: destroy

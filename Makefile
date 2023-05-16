@@ -41,6 +41,7 @@ apply: ## Apply resource changes
 	@(cd infastructure/base; make apply)
 	@(cd infastructure/workload; make apply)
 
+.PHONY: deploy
 deploy: ## Deploy base infrastructure, build and push docker image, deploy workload infrastructure
 	@(cd infastructure/base; make deploy)
 	$(GET_ACCOUNT_NUMBER)
@@ -49,15 +50,6 @@ deploy: ## Deploy base infrastructure, build and push docker image, deploy workl
 	docker build -t "$(ECR_URL):latest" -t "$(ECR_URL):${image_version}" -f service/src/Dockerfile service/src/
 	docker push "$(ECR_URL):latest"
 	docker push "$(ECR_URL):${image_version}"
-	@(cd infastructure/workload; make plan)
-
-.PHONY: deployx
-deployx: ## Deploy base infrastructure, build and push docker image, deploy workload infrastructure
-	@(cd infastructure/base; make deploy)
-	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin ${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com
-	docker build -t "${aws_ecr_repository.tf_demo_service.repository_url}:latest" -t "${aws_ecr_repository.tf_demo_service.repository_url}:${var.image_version}" -f service/src/Dockerfile service/src/
-	docker push "${aws_ecr_repository.tf_demo_service.repository_url}:latest"
-	docker push "${aws_ecr_repository.tf_demo_service.repository_url}:${var.image_version}"
 	@(cd infastructure/workload; make deploy)
 
 .PHONY: destroy
