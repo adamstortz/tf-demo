@@ -50,7 +50,7 @@ module "eks" {
   cluster_endpoint_public_access = true
   kms_key_administrators = [
     "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/oidc_github_terraform",
-    data.aws_caller_identity.current.arn
+    "arn:aws:sts::${data.aws_caller_identity.current.account_id}:assumed-role/AWSReservedSSO_AdministratorAccess_21201f2554c485ff"
   ]
   eks_managed_node_group_defaults = {
     ami_type = "AL2_x86_64"
