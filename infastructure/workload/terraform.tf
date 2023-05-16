@@ -23,8 +23,8 @@ terraform {
 
   required_version = "~> 1.4"
   backend "s3" {
-       bucket = "tf-demo-astortz"
-       key    = "workload-tf-demo"
-       region = "us-east-2"
-   }
+    bucket = "tf-demo-astortz"
+    key    = "workload-tf-demo"
+    region = "us-east-2"
+  }
 }
