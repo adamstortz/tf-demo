@@ -130,6 +130,7 @@ resource "kubernetes_deployment" "workload" {
     }
   }
 }
+
 resource "kubernetes_service" "workload" {
   metadata {
     name      = local.service_name
