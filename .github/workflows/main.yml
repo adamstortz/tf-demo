@@ -31,7 +31,7 @@ jobs:
         run: |
           terraform -chdir=infastructure/base apply -no-color -auto-approve
           ECR_URL=$(terraform -chdir=infastructure/base output -raw ecr_url)
-          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $(ACCOUNT_NUMBER).dkr.ecr.us-east-2.amazonaws.com
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-2.amazonaws.com
           docker build -t "${ECR_URL}:latest" -t "${ECR_URL}:${{ github.event.number }}" -f service/src/Dockerfile service/src/
           docker push "${ECR_URL}:latest"
           docker push "${ECR_URL}:${{ github.event.number }}"
