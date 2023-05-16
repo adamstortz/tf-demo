@@ -52,6 +52,7 @@ deploy: ## Deploy base infrastructure, build and push docker image, deploy workl
 	docker push "$(ECR_URL):${image_version}"
 	@(cd infastructure/workload; make deploy)
 
+
 .PHONY: destroy
 destroy: ## Destroy resources
 	@(cd infastructure/base; make destroy)
