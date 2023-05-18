@@ -9,11 +9,9 @@
   - Make
 - Environment Variables:
   - AWS_REGION
-- AWS
-  - S3 bucket
-    - name: tf-demo-astortz
-    - region: us-east-2
-    - versioning: enabled
+- Choose a bucket name - `BUCKET_NAME`
+- Create an AWS S3 bucket in the us-east-2 region with the name and versioning enabled
+- Update all instances of `bucket = "tf-demo-astortz"` to `bucket = "BUCKET_NAME"` 
 - If running from GitHub Actions
   - configure [OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
   - Add a repo secret named `AWS_ACCOUNT_ID`
