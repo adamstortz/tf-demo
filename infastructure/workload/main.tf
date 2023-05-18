@@ -29,22 +29,6 @@ resource "aws_security_group" "eks" {
   description = "Allow traffic"
   vpc_id      = module.vpc.vpc_id
 
-  # ingress {
-  #   description = "World"
-  #   from_port   = 0
-  #   to_port     = 0
-  #   protocol    = "-1"
-  #   cidr_blocks = var.ingress_cidr_blocks
-  # }
-
-  # egress {
-  #   from_port        = 0
-  #   to_port          = 0
-  #   protocol         = "-1"
-  #   cidr_blocks      = ["0.0.0.0/0"]
-  #   ipv6_cidr_blocks = ["::/0"]
-  # }
-
 }
 
 resource "aws_vpc_security_group_ingress_rule" "eks" {
