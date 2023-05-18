@@ -48,4 +48,9 @@ jobs:
       - name: Terraform Apply - workload
         id: apply_workload
         run: terraform -chdir=infastructure/workload apply -var-file='${{ matrix.environment }}.tfvars' -var="image_version=${{ github.event.pull_request.number }}" -no-color -auto-approve
+      
+      - name: Smoke Test
+        run: |
+          LB_HOST_NAME=$(terraform -chdir=infastructure/workload output -raw load_balancer_name)
+          echo "placholder to run smoke test against load balancer: LB_HOST_NAME=${LB_HOST_NAME} npm run test:integration"
      
