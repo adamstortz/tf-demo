@@ -37,10 +37,6 @@ jobs:
           terraform -chdir=infastructure/base init
           terraform -chdir=infastructure/workload init
       
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-      
       - name: Terraform Apply - base
         id: apply_base
         run: terraform -chdir=infastructure/base apply -no-color -auto-approve
@@ -48,5 +44,5 @@ jobs:
       - name: Terraform Apply - workload
         id: apply_workload
         run: |
-          terraform -chdir=infastructure/workload apply -no-color -var="image_version=${{ github.run_number }}" -auto-approve
+          terraform -chdir=infastructure/workload apply -no-color -var="image_version=${{ github.event.pull_request.number }}" -auto-approve
      
