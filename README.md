@@ -15,6 +15,7 @@
 - If running from GitHub Actions
   - configure [OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
   - Add a repo secret named `AWS_ACCOUNT_ID`
+- Update `kms_key_administrators` in `infrastructure/workload/main.tf` list to include your role
 
 ## Deploy and test
 
@@ -22,7 +23,7 @@
 # Initialize codebase
 make init
 # Deploy
-make deploy
+make deploy_base deploy_workload
 # Test
 make test
 ```
