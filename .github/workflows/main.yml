@@ -11,6 +11,9 @@ jobs:
     if: github.event.pull_request.merged == true
     name: "Terraform Apply"
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev]
     permissions:
       contents: read
       pull-requests: write
@@ -37,12 +40,9 @@ jobs:
           terraform -chdir=infastructure/base init
           terraform -chdir=infastructure/workload init
       
-      - name: Terraform Apply - base
-        id: apply_base
-        run: terraform -chdir=infastructure/base apply -no-color -auto-approve
-
-      - name: Terraform Apply - workload
-        id: apply_workload
+      - name: Terraform Apply
+        id: apply
         run: |
-          terraform -chdir=infastructure/workload apply -no-color -var="image_version=${{ github.event.pull_request.number }}" -auto-approve
+          terraform -chdir=infastructure/base apply -var-file='${{ matrix.environment }}.tfvars' -no-color -auto-approve
+          terraform -chdir=infastructure/workload apply -var-file='${{ matrix.environment }}.tfvars' -var="image_version=${{ github.event.pull_request.number }}" -no-color -auto-approve
      
