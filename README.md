@@ -16,11 +16,13 @@
     - versioning: enabled
   - https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
 
-## Execution
+## Deploy and test
 
 ```bash
 # Initialize codebase
 make init
 # Deploy
 make deploy
+# Test
+make test
 ```
