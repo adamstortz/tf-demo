@@ -13,6 +13,6 @@ describe("GET /", function () {
     expect(response.status).to.eql(200);
     expect(response.body.message).to.eql('Automate all the things!');
     expect(response.body.timestamp).to.be.a('number');
-    expect(response.body.timestamp).have.lengthOf(10);
+    expect(response.body.timestamp).to.be.within(1600000000000, 2000000000000);
   });
 });

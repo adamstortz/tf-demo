@@ -15,7 +15,7 @@ const server = http.createServer(async (req, res) => {
 const getResponseBody = () => {
   return {
     message: "Automate all the things!",
-    timestamp: 1529729125,
+    timestamp: Date.now(),
   };
 };
 
