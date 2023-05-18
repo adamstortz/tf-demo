@@ -1,11 +1,14 @@
 name: main
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
       - main
 
 jobs:
   terraform:
+    if: github.event.pull_request.merged == true
     name: "Terraform Apply"
     runs-on: ubuntu-latest
     permissions:
@@ -34,13 +37,16 @@ jobs:
           terraform -chdir=infastructure/base init
           terraform -chdir=infastructure/workload init
       
-      - name: Terraform Apply
-        id: apply
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      
+      - name: Terraform Apply - base
+        id: apply_base
+        run: terraform -chdir=infastructure/base apply -no-color -auto-approve
+
+      - name: Terraform Apply - workload
+        id: apply_workload
         run: |
-          terraform -chdir=infastructure/base apply -no-color -auto-approve
-          ECR_URL=$(terraform -chdir=infastructure/base output -raw ecr_url)
-          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-2.amazonaws.com
-          docker build -t "${ECR_URL}:latest" -t "${ECR_URL}:${{ github.run_number }}" -f service/src/Dockerfile service/src/
-          docker push "${ECR_URL}:latest"
-          docker push "${ECR_URL}:${{ github.run_number }}"
           terraform -chdir=infastructure/workload apply -no-color -var="image_version=${{ github.run_number }}" -auto-approve
+     

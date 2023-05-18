@@ -4,3 +4,4 @@
 *.tfstate
 *.tfstate.backup
 node_modules
+tf_plan-*.json
