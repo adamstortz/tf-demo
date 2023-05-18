@@ -1,0 +1,33 @@
+{
+  "name": "tf-demo",
+  "version": "1.0.0",
+  "description": "## Prerequisites",
+  "main": "service/src/index.js",
+  "scripts": {
+    "test:integration": "mocha --config .mocharc.integration.yaml",
+    "test:unit": "mocha --config .mocharc.unit.yaml"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adamstortz/tf-demo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adamstortz/tf-demo/issues"
+  },
+  "homepage": "https://github.com/adamstortz/tf-demo#readme",
+  "devDependencies": {
+    "@types/chai": "^4.3.5",
+    "@types/jest": "^29.5.1",
+    "@types/node": "^20.1.3",
+    "@types/supertest": "^2.0.12",
+    "chai": "^4.3.7",
+    "jest": "^29.5.0",
+    "mocha": "^10.2.0",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  }
+}

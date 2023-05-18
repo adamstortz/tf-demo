@@ -39,6 +39,7 @@ resource "aws_vpc_security_group_ingress_rule" "eks" {
   ip_protocol = "tcp"
   to_port     = 8080
 }
+
 resource "aws_vpc_security_group_egress_rule" "eks" {
   security_group_id = aws_security_group.eks.id
 

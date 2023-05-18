@@ -1,5 +1,6 @@
 GET_ACCOUNT_NUMBER = $(eval ACCOUNT_NUMBER=$(shell aws sts get-caller-identity --query "Account" --output text))
 GET_ECR_URL = $(eval ECR_URL=$(shell terraform -chdir=infastructure/base output -raw ecr_url))
+GET_LB_HOST_NAME = $(eval LB_HOST_NAME=$(shell terraform -chdir=infastructure/workload output -raw load_balancer_name))
 
 .PHONY: fmt
 fmt: ## Rewrites config to canonical format
@@ -34,8 +35,9 @@ init: ## Initialize Terraform
 
 .PHONY: test
 test: ## Initialize Terraform
+	$(GET_LB_HOST_NAME)
 	@(npm run test:unit)
-	@(npm run test:integration)
+	@(LB_HOST_NAME=$(LB_HOST_NAME) npm run test:integration)
 
 .PHONY: plan
 plan: ## Plan resource changes

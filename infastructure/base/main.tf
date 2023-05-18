@@ -11,6 +11,7 @@ resource "random_string" "suffix" {
 resource "aws_ecr_repository" "tf_demo_service" {
   name = local.service_name
 
+  force_delete = true
   image_scanning_configuration {
     scan_on_push = true
   }
