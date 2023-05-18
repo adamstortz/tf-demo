@@ -34,15 +34,18 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/oidc_github_terraform
           aws-region: us-east-2
-      - name: Terraform Init
-        id: init
-        run: |
-          terraform -chdir=infastructure/base init
-          terraform -chdir=infastructure/workload init
+
+      - name: Terraform Init - base
+        id: init_base
+        run: terraform -chdir=infastructure/base init
+      - name: Terraform Init - workload
+        id: init_workload
+        run: terraform -chdir=infastructure/workload init
       
-      - name: Terraform Apply
-        id: apply
-        run: |
-          terraform -chdir=infastructure/base apply -var-file='${{ matrix.environment }}.tfvars' -no-color -auto-approve
-          terraform -chdir=infastructure/workload apply -var-file='${{ matrix.environment }}.tfvars' -var="image_version=${{ github.event.pull_request.number }}" -no-color -auto-approve
+      - name: Terraform Apply - base
+        id: apply_base
+        run: terraform -chdir=infastructure/base apply -var-file='${{ matrix.environment }}.tfvars' -no-color -auto-approve
+      - name: Terraform Apply - workload
+        id: apply_workload
+        run: terraform -chdir=infastructure/workload apply -var-file='${{ matrix.environment }}.tfvars' -var="image_version=${{ github.event.pull_request.number }}" -no-color -auto-approve
      
