@@ -49,15 +49,19 @@ apply: ## Apply resource changes
 	@(cd infastructure/base; make apply)
 	@(cd infastructure/workload; make apply)
 
-.PHONY: deploy
-deploy: ## Deploy base infrastructure, build and push docker image, deploy workload infrastructure
+.PHONY: deploy_base
+deploy_base: ## Deploy base infrastructure, build and push docker image, deploy workload infrastructure
+	$(GET_ACCOUNT_NUMBER)
+	@(cd infastructure/base && \
+	  make deploy)
+
+.PHONY: deploy_workload
+deploy_workload: ## Build and push docker image, deploy workload infrastructure
 	$(GET_ACCOUNT_NUMBER)
 	$(GET_ECR_URL)
 	@(image_version=$$RANDOM && \
-	  cd infastructure/base && \
-	  make deploy && \
-	  cd ../.. && \
 	  aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(ACCOUNT_NUMBER).dkr.ecr.$(AWS_REGION).amazonaws.com && \
+	  echo $(ECR_URL) && \
 	  docker build -t "$(ECR_URL):latest" -t "$(ECR_URL):$${image_version}" -f service/src/Dockerfile service/src/ && \
 	  docker push "$(ECR_URL):latest" && \
 	  docker push "$(ECR_URL):$${image_version}" && \
@@ -66,8 +70,8 @@ deploy: ## Deploy base infrastructure, build and push docker image, deploy workl
 
 .PHONY: destroy
 destroy: ## Destroy resources
-	@(cd infastructure/base; make destroy)
 	@(cd infastructure/workload; make destroy)
+	@(cd infastructure/base; make destroy)
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
