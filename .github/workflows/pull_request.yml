@@ -45,8 +45,10 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-          terraform -chdir=infastructure/base plan -var-file='${{ matrix.environment }}.tfvars' -no-color -out tf_plan.json
-          terraform -chdir=infastructure/workload plan -var-file='${{ matrix.environment }}.tfvars' -var 'image_version=${{ github.event.pull_request.number }})' -no-color -out tf_plan.json
+          terraform -chdir=infastructure/base plan -var-file='${{ matrix.environment }}.tfvars' -no-color -out tf_plan.plan
+          terraform -chdir=infastructure/base show -no-color -json tf_plan.plan > tf_plan-base.json
+          terraform -chdir=infastructure/workload plan -var-file='${{ matrix.environment }}.tfvars' -var 'image_version=${{ github.event.pull_request.number }})' -no-color -out tf_plan.plan
+          terraform -chdir=infastructure/workload show -no-color -json tf_plan.plan > tf_plan-workload.json
       
       - name: Login to Amazon ECR
         id: login-ecr
@@ -71,6 +73,6 @@ jobs:
       - uses: liatrio/terraform-change-pr-commenter@v1.4.0
         with:
           json-file: |
-            infastructure/base/tf_plan.json
-            infastructure/workload/tf_plan.json
+            tf_plan-base.json
+            tf_plan-workload.json
           expand-comment: 'true' 
