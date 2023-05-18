@@ -5,7 +5,7 @@ on:
       - main
 jobs:
   terraform:
-    name: "Terraform Plan"
+    name: "Plan Deployment"
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -31,23 +31,28 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/oidc_github_terraform
           aws-region: us-east-2
           
-      - name: Terraform Init
-        id: init
-        run: |
-          terraform -chdir=infastructure/base init
-          terraform -chdir=infastructure/workload init
+      - name: Terraform Init - base
+        id: init_base
+        run: terraform -chdir=infastructure/base init
+      - name: Terraform Init - workload
+        id: init_workload
+        run: terraform -chdir=infastructure/workload init
       
-      - name: Terraform Validate
-        id: validate
-        run: |
-          terraform -chdir=infastructure/base validate -no-color
-          terraform -chdir=infastructure/workload validate -no-color
+      - name: Terraform Validate - base
+        id: validate_base
+        run: terraform -chdir=infastructure/base validate -no-color
+      - name: Terraform Validate - workload
+        id: validate_workload
+        run: terraform -chdir=infastructure/workload validate -no-color
       
-      - name: Terraform Plan
-        id: plan
+      - name: Terraform Plan - base
+        id: plan_base
         run: |
           terraform -chdir=infastructure/base plan -var-file='${{ matrix.environment }}.tfvars' -no-color -out tf_plan.plan
           terraform -chdir=infastructure/base show -no-color -json tf_plan.plan > tf_plan-base.json
+      - name: Terraform Plan - workload
+        id: plan_workload
+        run: |
           terraform -chdir=infastructure/workload plan -var-file='${{ matrix.environment }}.tfvars' -var 'image_version=${{ github.event.pull_request.number }})' -no-color -out tf_plan.plan
           terraform -chdir=infastructure/workload show -no-color -json tf_plan.plan > tf_plan-workload.json
       
