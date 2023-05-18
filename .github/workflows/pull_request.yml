@@ -72,8 +72,6 @@ jobs:
           context: service/src/
           file: service/src/Dockerfile
           push: true
-          sbom: true
-          provenance: true
           tags: ${{ steps.login-ecr.outputs.registry }}/tf-demo-service:${{ github.event.pull_request.number }},${{ steps.login-ecr.outputs.registry }}/tf-demo-service:latest
       
       - uses: liatrio/terraform-change-pr-commenter@v1.4.0
