@@ -2,7 +2,7 @@ import { expect } from "chai";
 const service = require("../../src");
 
 describe("Service unit tests", () => {
-  it("Should have message 'Automate all the things!'", () => {
+  it("Should have expected payload", () => {
     const result = service.getResponseBody();
 
     expect(result.message).to.eql('Automate all the things!');

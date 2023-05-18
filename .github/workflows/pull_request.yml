@@ -71,6 +71,6 @@ jobs:
       - uses: liatrio/terraform-change-pr-commenter@v1.4.0
         with:
           json-file: |
-            infastructure/base/tfplan.json
-            infastructure/workload/tfplan.json
+            infastructure/base/tf_plan.json
+            infastructure/workload/tf_plan.json
           expand-comment: 'true' 
