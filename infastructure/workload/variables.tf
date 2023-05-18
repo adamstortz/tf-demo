@@ -3,3 +3,9 @@ variable "image_version" {
   type        = string
   default     = "local"
 }
+
+variable "ingress_cidr_block" {
+  description = "List of CIDRs to allow ingress"
+  type        = string
+  default     = ""
+}

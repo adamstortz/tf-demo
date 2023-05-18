@@ -1,5 +1,14 @@
 data "aws_availability_zones" "available" {}
 data "aws_caller_identity" "current" {}
+data "terraform_remote_state" "stack" {
+  backend = "s3"
+
+  config = {
+    bucket = "tf-demo-astortz"
+    key    = "base"
+    region = "us-east-2"
+  }
+}
 
 resource "random_string" "suffix" {
   length  = 8
@@ -11,6 +20,48 @@ locals {
   service_name  = "${local.workload_name}-service"
   cluster_name  = "${local.workload_name}-eks-${random_string.suffix.result}"
   github_role   = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/oidc_github_terraform"
+  ecr_url       = data.terraform_remote_state.stack.outputs.ecr_url
+}
+
+
+resource "aws_security_group" "eks" {
+  name        = "eks cluster"
+  description = "Allow traffic"
+  vpc_id      = module.vpc.vpc_id
+
+  # ingress {
+  #   description = "World"
+  #   from_port   = 0
+  #   to_port     = 0
+  #   protocol    = "-1"
+  #   cidr_blocks = var.ingress_cidr_blocks
+  # }
+
+  # egress {
+  #   from_port        = 0
+  #   to_port          = 0
+  #   protocol         = "-1"
+  #   cidr_blocks      = ["0.0.0.0/0"]
+  #   ipv6_cidr_blocks = ["::/0"]
+  # }
+
+}
+
+resource "aws_vpc_security_group_ingress_rule" "eks" {
+  security_group_id = aws_security_group.eks.id
+
+  cidr_ipv4   = var.ingress_cidr_block
+  from_port   = 80
+  ip_protocol = "tcp"
+  to_port     = 8080
+}
+resource "aws_vpc_security_group_egress_rule" "eks" {
+  security_group_id = aws_security_group.eks.id
+
+  cidr_ipv4   = "0.0.0.0/0"
+  from_port   = 0
+  ip_protocol = "tcp"
+  to_port     = 0
 }
 
 module "vpc" {
@@ -46,9 +97,11 @@ module "eks" {
   cluster_name    = local.cluster_name
   cluster_version = "1.24"
 
-  vpc_id                         = module.vpc.vpc_id
-  subnet_ids                     = module.vpc.private_subnets
-  cluster_endpoint_public_access = true
+  vpc_id                                = module.vpc.vpc_id
+  subnet_ids                            = module.vpc.private_subnets
+  cluster_endpoint_public_access        = true
+  cluster_additional_security_group_ids = [aws_security_group.eks.id]
+
   kms_key_administrators = [
     local.github_role,
     "arn:aws:sts::${data.aws_caller_identity.current.account_id}:assumed-role/AWSReservedSSO_AdministratorAccess_21201f2554c485ff/astortz"
@@ -94,7 +147,6 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
 }
 
-
 resource "kubernetes_namespace" "workload" {
   metadata {
     name = local.workload_name
@@ -120,10 +172,10 @@ resource "kubernetes_deployment" "workload" {
       }
       spec {
         container {
-          image = "nginx"
-          name  = "nginx-container"
+          image = "${local.ecr_url}:${var.image_version}"
+          name  = local.service_name
           port {
-            container_port = 80
+            container_port = 8080
           }
         }
       }
@@ -143,7 +195,7 @@ resource "kubernetes_service" "workload" {
     type = "LoadBalancer"
     port {
       port        = 80
-      target_port = 80
+      target_port = 8080
     }
   }
 }
