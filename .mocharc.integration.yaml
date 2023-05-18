@@ -1,0 +1,2 @@
+spec: service/test/integration/**/*.ts
+loader: ts-node/esm

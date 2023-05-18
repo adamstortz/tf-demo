@@ -7,6 +7,9 @@ jobs:
   terraform:
     name: "Terraform Plan"
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev]
     permissions:
       contents: read
       pull-requests: write
@@ -14,11 +17,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install dependencies
+        run: npm ci
+      - name: Unit Test
+        run: npm run test:unit
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/oidc_github_terraform
           aws-region: us-east-2
+          
       - name: Terraform Init
         id: init
         run: |
@@ -34,5 +46,34 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-          terraform -chdir=infastructure/base plan -no-color
-          terraform -chdir=infastructure/workload plan -no-color
+          terraform -chdir=infastructure/base plan -var-file='${{ matrix.environment }}.tfvars' -no-color -out tf_plan.plan
+          terraform -chdir=infastructure/base show -no-color -json tf_plan.plan > tf_plan-base.json
+          terraform -chdir=infastructure/workload plan -var-file='${{ matrix.environment }}.tfvars' -var 'image_version=${{ github.event.pull_request.number }})' -no-color -out tf_plan.plan
+          terraform -chdir=infastructure/workload show -no-color -json tf_plan.plan > tf_plan-workload.json
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: service/src/
+          file: service/src/Dockerfile
+          push: true
+          sbom: true
+          provenance: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/tf-demo-service:${{ github.event.pull_request.number }},${{ steps.login-ecr.outputs.registry }}/tf-demo-service:latest
+      
+      - uses: liatrio/terraform-change-pr-commenter@v1.4.0
+        with:
+          json-file: |
+            tf_plan-base.json
+            tf_plan-workload.json
+          expand-comment: 'true' 

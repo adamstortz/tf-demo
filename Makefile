@@ -1,6 +1,7 @@
 GET_ACCOUNT_NUMBER = $(eval ACCOUNT_NUMBER=$(shell aws sts get-caller-identity --query "Account" --output text))
 GET_ECR_URL = $(eval ECR_URL=$(shell terraform -chdir=infastructure/base output -raw ecr_url))
-image_version = local
+GET_LB_HOST_NAME = $(eval LB_HOST_NAME=$(shell terraform -chdir=infastructure/workload output -raw load_balancer_name))
+
 .PHONY: fmt
 fmt: ## Rewrites config to canonical format
 	@(cd infastructure/base; make fmt)
@@ -30,6 +31,13 @@ refresh: ## Refresh infra resources
 init: ## Initialize Terraform
 	@(cd infastructure/base; make init)
 	@(cd infastructure/workload; make init)
+	@(npm install)
+
+.PHONY: test
+test: ## Initialize Terraform
+	$(GET_LB_HOST_NAME)
+	@(npm run test:unit)
+	@(LB_HOST_NAME=$(LB_HOST_NAME) npm run test:integration)
 
 .PHONY: plan
 plan: ## Plan resource changes
@@ -43,15 +51,18 @@ apply: ## Apply resource changes
 
 .PHONY: deploy
 deploy: ## Deploy base infrastructure, build and push docker image, deploy workload infrastructure
-	@(cd infastructure/base; make deploy)
 	$(GET_ACCOUNT_NUMBER)
 	$(GET_ECR_URL)
-	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(ACCOUNT_NUMBER).dkr.ecr.$(AWS_REGION).amazonaws.com
-	docker build -t "$(ECR_URL):latest" -t "$(ECR_URL):${image_version}" -f service/src/Dockerfile service/src/
-	docker push "$(ECR_URL):latest"
-	docker push "$(ECR_URL):${image_version}"
-	@(cd infastructure/workload; make deploy)
-
+	@(image_version=$$RANDOM && \
+	  cd infastructure/base && \
+	  make deploy && \
+	  cd ../.. && \
+	  aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(ACCOUNT_NUMBER).dkr.ecr.$(AWS_REGION).amazonaws.com && \
+	  docker build -t "$(ECR_URL):latest" -t "$(ECR_URL):$${image_version}" -f service/src/Dockerfile service/src/ && \
+	  docker push "$(ECR_URL):latest" && \
+	  docker push "$(ECR_URL):$${image_version}" && \
+	  cd infastructure/workload && \
+	  make deploy -e image_version=$${image_version})
 
 .PHONY: destroy
 destroy: ## Destroy resources

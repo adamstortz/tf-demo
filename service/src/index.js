@@ -1,6 +1,6 @@
 const http = require("http");
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8080;
 const server = http.createServer(async (req, res) => {
   if (req.url === "/api" && req.method === "GET") {
     console.log("Received API call");

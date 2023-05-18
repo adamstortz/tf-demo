@@ -1,3 +1,6 @@
+environment = dev
+image_version = 
+
 .PHONY: fmt
 fmt: ## Rewrites config to canonical format
 	@terraform fmt
@@ -40,11 +43,11 @@ apply: ## Apply resource changes
 
 .PHONY: deploy
 deploy: ## Apply resource changes
-	@terraform apply -auto-approve
+	@terraform apply -auto-approve -var-file='$(environment).tfvars' -var 'image_version=$(image_version)'
 
 .PHONY: destroy
 destroy: ## Destroy resources
-	@terraform destroy
+	@terraform destroy -var-file='$(environment).tfvars'
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
