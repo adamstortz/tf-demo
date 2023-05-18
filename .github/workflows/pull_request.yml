@@ -30,11 +30,21 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/oidc_github_terraform
           aws-region: us-east-2
-      - name: Terraform Init
-        id: init
-        run: |
-          terraform -chdir=infastructure/base init
-          terraform -chdir=infastructure/workload init
+      - name: 'Terraform Init'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: 'infastructure/base'
+      - name: 'Terraform Init'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: 'infastructure/workload'
+      # - name: Terraform Init
+      #   id: init
+      #   run: |
+      #     terraform -chdir=infastructure/base init
+      #     terraform -chdir=infastructure/workload init
       
       - name: Terraform Validate
         id: validate
